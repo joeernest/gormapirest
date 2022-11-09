@@ -17,18 +17,8 @@ func GetAllUsers(rw http.ResponseWriter, r *http.Request) {
 	sendData(rw, users, http.StatusOK)
 }
 
-// GetUser : Get a user by ID
-func GetUser(rw http.ResponseWriter, r *http.Request) {
-	user, err := getUserById(r)
-	if err != nil || user.Id == 0 {
-		sendError(rw, http.StatusNotFound)
-	} else {
-		sendData(rw, user, http.StatusOK)
-	}
-}
-
-// getUserById : "func private"
-func getUserById(r *http.Request) (models.User, *gorm.DB) {
+// checkIfUserExists : "get a user by ID"
+func checkIfUserExists(r *http.Request) (models.User, *gorm.DB) {
 	vars := mux.Vars(r)
 	userId, _ := strconv.Atoi(vars["id"])
 	user := models.User{}
@@ -39,6 +29,16 @@ func getUserById(r *http.Request) (models.User, *gorm.DB) {
 		return user, nil
 	}
 
+}
+
+// GetUserByID : Get a user by ID
+func GetUserByID(rw http.ResponseWriter, r *http.Request) {
+	user, err := checkIfUserExists(r)
+	if err != nil || user.Id == 0 {
+		sendError(rw, http.StatusNotFound)
+	} else {
+		sendData(rw, user, http.StatusOK)
+	}
 }
 
 // CreateUser : Creates a new user
@@ -54,10 +54,10 @@ func CreateUser(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// UpdateUser : Updates a user by ID
-func UpdateUser(rw http.ResponseWriter, r *http.Request) {
+// UpdateUserByID : Updates a user by ID
+func UpdateUserByID(rw http.ResponseWriter, r *http.Request) {
 	var userId int64
-	if oldUser, err := getUserById(r); err != nil {
+	if oldUser, err := checkIfUserExists(r); err != nil {
 		sendError(rw, http.StatusNotFound)
 	} else {
 		userId = oldUser.Id
@@ -73,9 +73,9 @@ func UpdateUser(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// DeleteUser : Delete a user by ID
-func DeleteUser(rw http.ResponseWriter, r *http.Request) {
-	if user, err := getUserById(r); err != nil {
+// DeleteUserByID : Delete a user by ID
+func DeleteUserByID(rw http.ResponseWriter, r *http.Request) {
+	if user, err := checkIfUserExists(r); err != nil {
 		sendError(rw, http.StatusNotFound)
 	} else {
 		db.Database.Delete(&user)

@@ -1,9 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/joeernest/gormapirest/handlers"
 	"github.com/joeernest/gormapirest/models"
+	"github.com/joeernest/gormapirest/routing"
 	"log"
 	"net/http"
 )
@@ -11,15 +12,12 @@ import (
 func main() {
 
 	models.MigrateUsers()
-	router := mux.NewRouter()
 
-	// Routing
-	router.HandleFunc("/api/user/", handlers.GetAllUsers).Methods("GET")
-	router.HandleFunc("/api/user/{id:[0-9]+}", handlers.GetUser).Methods("GET")
-	router.HandleFunc("/api/user/", handlers.CreateUser).Methods("POST")
-	router.HandleFunc("/api/user/{id:[0-9]+}", handlers.UpdateUser).Methods("PUT")
-	router.HandleFunc("/api/user/{id:[0-9]+}", handlers.DeleteUser).Methods("DELETE")
+	router := mux.NewRouter().StrictSlash(true)
+	routing.RegisterUserRoutes(router)
 
 	// Starting server
+	// Start the server
+	log.Println(fmt.Sprintf("Starting Server on port 3000"))
 	log.Fatal(http.ListenAndServe(":3000", router))
 }
